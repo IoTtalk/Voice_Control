@@ -31,8 +31,8 @@ $(function () {
             };
             recognition.onresult=function(event){
                 if(event != undefined){
-                    console.log(event.result[event.resultIndex][0].transcript);
-                    dan.push("Result", [event.result[event.resultIndex][0].transcript]);
+                    console.log(event.results[event.resultIndex][0].transcript);
+                    dan.push("Result", [event.results[event.resultIndex][0].transcript]);
                 }
             };
             recognition.start();
