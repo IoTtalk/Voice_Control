@@ -1,15 +1,13 @@
 $(function () {
     //init UI
     $("#not_support").hide();
-    var SW = new SiriWave({
+    var siriwave = new SiriWave({
         style: 'ios9',
         speed: 0.08,
         amplitude: 0.3,
-        container: document.getElementById('siriwave'),
         autostart: true,
     });
-
-
+    
     function Result (data) {
     }
 
