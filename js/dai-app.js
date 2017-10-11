@@ -20,10 +20,9 @@ $(function () {
         window.speechSynthesis.speak(msg);
         msg.onend = function(){
             var recognition = new webkitSpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = false;
+            recognition.continuous = false;
+            recognition.interimResults = true;
             recognition.lang="cmn-Hant-TW";
-            var end = false;
             recognition.onstart=function(){
                 console.log("on start");
                 siriwave.start();
@@ -31,21 +30,20 @@ $(function () {
             };
             recognition.onend=function(){
                 console.log("on end");
-                if(!end){
-                    recognition.start();
-                }
             };
             recognition.onresult=function(event){
                 if(event != undefined){
-                    console.log(event.results[event.resultIndex][0].transcript);
+                    var index = event.results[event.resultIndex].length-1;
+                    //console.log(event.results[event.resultIndex][index].transcript);
+                    console.log(event);
                     // recognize text animation
-                    $("#recognizeText").text(event.results[event.resultIndex][0].transcript);
+                    $("#recognizeText").text(event.results[event.resultIndex][index].transcript);
                     $('#recognizeText').textillate();
-                    dan.push("Response", [JSON.stringify({'id':id, 'string':event.results[event.resultIndex][0].transcript})]);
-                    console.log([JSON.stringify({'id':id, 'string':event.results[event.resultIndex][0].transcript})]);
-                    end = true;
-                    recognition.stop();
-                    siriwave.stop();
+                    if(event.results[event.resultIndex].isFinal){
+                        dan.push("Response", [JSON.stringify({'id':id, 'string':event.results[event.resultIndex][index].transcript})]);
+                        console.log([JSON.stringify({'id':id, 'string':event.results[event.resultIndex][index].transcript})]);
+                        siriwave.stop();
+                    }
                 }
             };
             recognition.start();
