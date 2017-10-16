@@ -1,6 +1,11 @@
 $(function () {
     //init UI
     $("#not_support").hide();
+    if (!('webkitSpeechRecognition' in window) || !('speechSynthesis' in window)) {
+    	$("#not_support").show();
+        console.log( "not support!" );
+        return;
+    }
     var siriwave = new SiriWave({
         style: 'ios9',
         speed: 0.08,
@@ -68,10 +73,7 @@ $(function () {
 		eventQueue.push(data[0]);
     }
     function iot_app () {
-        if (!('webkitSpeechRecognition' in window) || !('speechSynthesis' in window)) {
-            $("#not_support").show();
-            console.log( "not support!" );
-        }
+
     }
 
     var profile = {
