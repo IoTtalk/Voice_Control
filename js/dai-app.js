@@ -7,47 +7,65 @@ $(function () {
         amplitude: 0.3,
         autostart: false,
     });
-    var id = -1;
-    function Response (data) {
+    var eventQueue = [];
+	var processing = true;
+	var id = -1;
+	var endRecognition = false;
+	var recognition = new webkitSpeechRecognition();
+	recognition.continuous = false;
+	recognition.interimResults = true;
+	recognition.lang="cmn-Hant-TW";
 
-    }
+	recognition.onstart=function(){
+		console.log("on start");
+		endRecognition = false;
+		siriwave.start();
+		$("#recognizeText").text("");
+	};
+	recognition.onend=function(){
+		if(!endRecognition){
+			recognition.start();
+			return;
+		}
+		processing = true;
+		console.log("on end");
+	};
+	recognition.onresult=function(event){
+		if(event != undefined){
+			var index = event.results[event.resultIndex].length-1;
+			console.log(event);
+			// recognize text animation
+			$("#recognizeText").text(event.results[event.resultIndex][index].transcript);
+			$('#recognizeText').textillate();
+			if(event.results[event.resultIndex].isFinal){
+				dan.push("Response", [id, event.results[event.resultIndex][index].transcript]);
+				siriwave.stop();
+				endRecognition = true;
+			}
+		}
+	};
+	function processQueue(){
+		console.log("process!");
+		if(eventQueue.length != 0 && processing){
+			processing = false;
+			var script = eventQueue.shift();
+			id = script[0];
+			var msg = new SpeechSynthesisUtterance(script[1]);
+			msg.lang = "zh-TW";
+			window.speechSynthesis.speak(msg);
+			$("#scriptText").text(script[1]);
+			$('#scriptText').textillate();
+			msg.onend = function(){
+				recognition.start();
+			};
+		}
+	}
+	setInterval(processQueue, 500);
+
+    function Response (data) {}
     function Script (data) {
         console.log(data);
-        data = JSON.parse(data[0]);
-        id = data["id"];
-        var msg = new SpeechSynthesisUtterance(data["string"]);
-        msg.lang = "zh-TW";
-        window.speechSynthesis.speak(msg);
-        msg.onend = function(){
-            var recognition = new webkitSpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = true;
-            recognition.lang="cmn-Hant-TW";
-            recognition.onstart=function(){
-                console.log("on start");
-                siriwave.start();
-                $("#recognizeText").text("");
-            };
-            recognition.onend=function(){
-                console.log("on end");
-            };
-            recognition.onresult=function(event){
-                if(event != undefined){
-                    var index = event.results[event.resultIndex].length-1;
-                    //console.log(event.results[event.resultIndex][index].transcript);
-                    console.log(event);
-                    // recognize text animation
-                    $("#recognizeText").text(event.results[event.resultIndex][index].transcript);
-                    $('#recognizeText').textillate();
-                    if(event.results[event.resultIndex].isFinal){
-                        dan.push("Response", [JSON.stringify({'id':id, 'string':event.results[event.resultIndex][index].transcript})]);
-                        console.log([JSON.stringify({'id':id, 'string':event.results[event.resultIndex][index].transcript})]);
-                        siriwave.stop();
-                    }
-                }
-            };
-            recognition.start();
-        };
+		eventQueue.push(data[0]);
     }
     function iot_app () {
         if (!('webkitSpeechRecognition' in window) || !('speechSynthesis' in window)) {
@@ -58,7 +76,7 @@ $(function () {
 
     var profile = {
         'dm_name': 'Voice_Control',
-        'df_list': [Response,Script],
+        'df_list': [Response,Script]
     }
 
     var ida = {
