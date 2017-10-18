@@ -66,9 +66,8 @@ $(function () {
 		}
 	}
 	setInterval(processQueue, 500);
-
-    function Response (data) {}
-    function Script (data) {
+    function IDText_I (data) {}
+    function IDText_O (data) {
         console.log(data);
 		eventQueue.push(data[0]);
     }
@@ -77,8 +76,8 @@ $(function () {
     }
 
     var profile = {
-        'dm_name': 'Voice_Control',
-        'df_list': [Response,Script]
+        'dm_name': 'SpeechCtl',
+        'df_list': [IDText_I,IDText_O]
     }
 
     var ida = {
